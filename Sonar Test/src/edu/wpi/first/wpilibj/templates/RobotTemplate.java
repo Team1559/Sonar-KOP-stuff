@@ -11,9 +11,9 @@ public class RobotTemplate extends IterativeRobot {
 	SonarMovement move;
 
 	public void robotInit() {
-		left = new Victor(2);
-		right = new Victor(3);
-                move = new SonarMovement(left, right, ssonar);
+            left = new Victor(2);
+            right = new Victor(3);
+            move = new SonarMovement(left, right, ssonar);
 	}
 
 	public void autonomousInit() {
@@ -22,12 +22,8 @@ public class RobotTemplate extends IterativeRobot {
 
 	public void autonomousPeriodic() {
             ssonar.periodic();
-            if(ssonar.right.getFeet() < 8 && ssonar.left.getFeet() < 8) {
-                move.turn();
-            }
-            
-
-	}
+            move.demo();
+        }
 
 	public void teleopInit() {
 
@@ -42,7 +38,7 @@ public class RobotTemplate extends IterativeRobot {
 	}
 
 	public void disabledInit() {
-		ssonar.stop();
+            ssonar.stop();
 	}
 
 	public void disabledPeriodic() {
