@@ -13,14 +13,20 @@ public class SonarMovement {
         Gyro gyro;
         double distance;
         double diagDist;
-        double diagonalConversion = 1.414213562;
-        final int maxDist = 8;
+        double diagonalConversion = Math.sqrt(2); // 1.414213562
+        final int maxDist = 5;
+        final int CLEAR = 0;
+        final int LEFT = 1;
+        final int RIGHT = 2;
+        final int NOTHING = 3;
+        int counter2 = 0;
         
-	public SonarMovement(Victor motorLeft, Victor motorRight, SonarStereo sonarStereo) {
+	public SonarMovement(Victor motorLeft, Victor motorRight, SonarStereo sonarStereo, Gyro gy) {
 		
                 leftMotor = motorLeft;
 		rightMotor = motorRight;
 		this.sonarStereo = sonarStereo;
+                gyro = gy;
 		
 	}
 	
@@ -28,17 +34,13 @@ public class SonarMovement {
             
             leftMotor.set(.265);
             rightMotor.set(-.25);
-            System.out.println("Moving ahead captain");
+            //System.out.println("Moving ahead captain");
 	}
 	public void stop() {
 		
-		if(sonarStereo.left.getFeet() < 5 && sonarStereo.right.getFeet() < 5) {
-			leftMotor.set(0);
-			rightMotor.set(0);
-		} else {
-			moveForward();
-		}
-	}
+            leftMotor.set(0);
+            rightMotor.set(0);
+        }
 	
 	public void stopSonar() {
 	
@@ -79,7 +81,7 @@ public class SonarMovement {
 //  }
         public void diagDist() {
              
-            System.out.println("Scanning enemy ships captain");
+            //System.out.println("Scanning enemy ships captain");
             
             //object is to the right
             if(sonarStereo.left.getFeet() > sonarStereo.right.getFeet()) {
@@ -92,53 +94,167 @@ public class SonarMovement {
             diagDist = distance * diagonalConversion;
         }
         
-        public void turnLeft() { //ADD PEDOMETER STUFF FOR ACTUAL ROBOT
+//        public void turnLeft() { //ADD PEDOMETER STUFF FOR ACTUAL ROBOT
+//            
+//            gyro.reset();
+//            if(gyro.getAngle() >= 315) {
+//                leftMotor.set(.15);
+//                rightMotor.set(-.5);
+//                System.out.println("Turning left m8");
+//            }
+//            else if(gyro.getAngle() <= 315) {
+//                moveForward();
+//            }
+//        }
+//        
+//        public void turnRight() { //ADD PEDOMETER STUFF FOR ACTUAL ROBOT
+//            
+//            gyro.reset();
+//            if(gyro.getAngle() <= 45) {
+//                leftMotor.set(.5);
+//                rightMotor.set(-.15);
+//                System.out.println("Turning right m8");
+//            }
+//            else if(gyro.getAngle() <= 45) {
+//                moveForward();
+//            }
+//        }
+        
+        public void turnLeft() {
             
-            gyro.reset();
-            if(gyro.getAngle() <= 45 && gyro.getAngle() > 0) {
-                leftMotor.set(.2);
-                rightMotor.set(.5);
+            if(decide() == LEFT) {
+                switch(counter) {
+                case 0:
+                    gyro.reset();
+                    counter = 1;
+                    break;
+                case 1:
+                    leftMotor.set(.2);
+                    rightMotor.set(.5);
+                    if(gyro.getAngle() == 45) {
+                        counter = 2;
+                    }
+                    break;
+                case 2:
+                    leftMotor.set(.5);
+                    rightMotor.set(.2);
+                    if(gyro.getAngle() == -45) {
+                        counter = 3;
+                    }
+                    break;
+                case 3:
+                    leftMotor.set(.2);
+                    rightMotor.set(.5);
+                    if(gyro.getAngle() == 0) {
+                        counter = 4;
+                    }
+                    counter2 = 0;
+                    break;
+//                case 4:
+//                    moveForward();
+//                    break;
+//                case 400:
+//                    stop();
+//                    break;
+                }
             }
         }
         
-        public void turnRight() { //ADD PEDOMETER STUFF FOR ACTUAL ROBOT
+        public void turnRight() {
             
-            gyro.reset();
-            if(gyro.getAngle() >= -45 && gyro.getAngle() < 0) {
-                leftMotor.set(.5);
-                rightMotor.set(.2);
+             if(decide() == RIGHT) {
+                switch(counter) {
+                case 0:
+                    gyro.reset();
+                    counter = 1;
+                    break;
+                case 1:
+                    leftMotor.set(.5);
+                    rightMotor.set(.2);
+                    if(gyro.getAngle() == -45) {
+                        counter = 2;
+                    }
+                    break;
+                case 2:
+                    leftMotor.set(.2);
+                    rightMotor.set(.5);
+                    if(gyro.getAngle() == 45) {
+                        counter = 3;
+                    }
+                    break;
+                case 3:
+                    leftMotor.set(.5);
+                    rightMotor.set(.2);
+                    if(gyro.getAngle() == 0) {
+                        counter = 4;
+                    }
+                    counter2 = 0;
+                    break;
+//                case 4:
+//                    moveForward();
+//                    break;
+//                case 400:
+//                    stop();
+//                    break;
+                }
             }
         }
         
-        public void decide() {
+        //for use when returns CLEAR
+        public void clear() {
             
-            System.out.println("Enemy ships cloaked captain, scanning area");
+            if(decide() == CLEAR) {
+                moveForward();
+            }
+        }
+        
+        public int decide() {
+            
+            //System.out.println("Enemy ships cloaked captain, scanning area");
+            
+             //no object found within the maximum distance, go forwards
+            if(sonarStereo.left.getFeet() > maxDist && sonarStereo.right.getFeet() > maxDist) {
+                return CLEAR;
+                //System.out.println("Enemy space clear captain, moving ahead");
+            }
             
             //object is to the right, turn left
-            if(sonarStereo.left.getFeet() > sonarStereo.right.getFeet() && 
-                    sonarStereo.left.getFeet() < maxDist && 
-                    sonarStereo.left.getFeet() < maxDist) {
-                turnLeft();
-                System.out.println("Turning left captain");
+            if(sonarStereo.left.getFeet() > sonarStereo.right.getFeet() &&
+                    sonarStereo.right.getFeet() < maxDist) {
+                return LEFT;
+                //System.out.println("Turning left captain");
             }
             //object is to the left, turn right
             else if(sonarStereo.left.getFeet() < sonarStereo.right.getFeet() &&
-                        sonarStereo.left.getFeet() < maxDist && 
                         sonarStereo.left.getFeet() < maxDist) {             
-                turnRight();
-                System.out.println("Turning right captain");
+                return RIGHT;
+                //System.out.println("Turning right captain");
             }
-            //no object found within the maximum distance, go forwards
-            else if(sonarStereo.left.getFeet() > 8 && sonarStereo.right.getFeet() >8) {
-                moveForward();
-                System.out.println("Enemy space clear captain, moving ahead");
+            else {
+                System.out.println("Decision failed");
+                return NOTHING;
             }
         }
         
         //DEMO FOR KIT OF PARTS CHASSIS
         public void demo() {
             
-            decide();
-            //method inside a method????? add stuff later lol n3rd5
+            switch (counter2) {
+            case 0:
+                moveForward();
+                decide();
+                counter2 = 1;
+                break;
+            case 1:
+                if(decide() == LEFT || decide() == RIGHT || decide() == CLEAR) {
+                    turnLeft(); //Added counter2 = 0 in method turnLeft
+                    turnRight(); //Added counter2 = 0 in method turnRight
+                    clear();
+                }
+                else {
+                    moveForward();
+                }
+                break;
+            }
         }
 } 

@@ -30,7 +30,7 @@ public class SonarStereo {
 	 */
 	public void periodic() {
 		final int START_PULSE = 0;
-		final int END_PULSE = START_PULSE + 1;
+		final int END_PULSE = START_PULSE + 2;
 		final int LEFT_SAMPLE = END_PULSE + 5;
 		final int RIGHT_SAMPLE = LEFT_SAMPLE + 5;
 
