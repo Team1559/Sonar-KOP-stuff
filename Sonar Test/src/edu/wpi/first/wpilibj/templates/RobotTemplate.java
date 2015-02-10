@@ -11,7 +11,6 @@ public class RobotTemplate extends IterativeRobot {
         Victor right;
 	SonarMovement move;
         Gyro gyro;
-        int test = 0;
 
 	public void robotInit() {
             left = new Victor(2);
@@ -30,11 +29,11 @@ public class RobotTemplate extends IterativeRobot {
         }
 
 	public void teleopInit() {
-            
+
 	}
 
 	public void teleopPeriodic() {
-            
+            ssonar.periodic();
         }
 
 	public void testPeriodic() {

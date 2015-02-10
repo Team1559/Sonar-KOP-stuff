@@ -20,6 +20,7 @@ public class SonarMovement {
         final int RIGHT = 2;
         final int NOTHING = 3;
         int counter2 = 0;
+        boolean decide;
         
 	public SonarMovement(Victor motorLeft, Victor motorRight, SonarStereo sonarStereo, Gyro gy) {
 		
@@ -122,33 +123,40 @@ public class SonarMovement {
         
         public void turnLeft() {
             
+          if (decide = true) {
             if(decide() == LEFT) {
                 switch(counter) {
                 case 0:
+                    decide = false;
+                    System.out.println("case 0");
                     gyro.reset();
                     counter = 1;
                     break;
                 case 1:
-                    leftMotor.set(.2);
-                    rightMotor.set(.5);
-                    if(gyro.getAngle() == 45) {
+                    decide = false;
+                    System.out.println("case 1");
+                    leftMotor.set(.05);
+                    rightMotor.set(-.5);
+                    if(gyro.getAngle() <= -90) {
                         counter = 2;
                     }
                     break;
                 case 2:
+                    decide = false;
+                    System.out.println("case 2");
                     leftMotor.set(.5);
-                    rightMotor.set(.2);
-                    if(gyro.getAngle() == -45) {
+                    rightMotor.set(-.05);
+                    if(gyro.getAngle() >= 45) {
                         counter = 3;
                     }
                     break;
                 case 3:
-                    leftMotor.set(.2);
-                    rightMotor.set(.5);
-                    if(gyro.getAngle() == 0) {
-                        counter = 4;
+                    decide = false;
+                    leftMotor.set(.05);
+                    rightMotor.set(-.5);
+                    if(gyro.getAngle() >= 0) {
+                        demo();
                     }
-                    counter2 = 0;
                     break;
 //                case 4:
 //                    moveForward();
@@ -157,38 +165,51 @@ public class SonarMovement {
 //                    stop();
 //                    break;
                 }
+              }
             }
         }
         
         public void turnRight() {
             
+            if(decide = true) {
              if(decide() == RIGHT) {
                 switch(counter) {
                 case 0:
+                    decide = false;
+                    System.out.println("case 0");
+                    sonarStereo.stop();
                     gyro.reset();
                     counter = 1;
+                    System.out.println(counter);
                     break;
                 case 1:
+                    decide = false;
                     leftMotor.set(.5);
-                    rightMotor.set(.2);
-                    if(gyro.getAngle() == -45) {
+                    rightMotor.set(-.05);
+                    System.out.println("case 1");
+                    if(gyro.getAngle() >= 45) {
                         counter = 2;
                     }
+                    System.out.println(counter);
                     break;
                 case 2:
-                    leftMotor.set(.2);
-                    rightMotor.set(.5);
-                    if(gyro.getAngle() == 45) {
+                    decide = false;
+                    leftMotor.set(.05);
+                    rightMotor.set(-.5);
+                    System.out.println("case 2");
+                    if(gyro.getAngle() <= -45) {
                         counter = 3;
                     }
+                    System.out.println(counter);
                     break;
                 case 3:
+                    decide = false;
                     leftMotor.set(.5);
-                    rightMotor.set(.2);
-                    if(gyro.getAngle() == 0) {
-                        counter = 4;
+                    rightMotor.set(-.05);
+                    if(gyro.getAngle() >= 0) {
+                        demo();
                     }
-                    counter2 = 0;
+                    System.out.println(counter);
                     break;
 //                case 4:
 //                    moveForward();
@@ -197,6 +218,7 @@ public class SonarMovement {
 //                    stop();
 //                    break;
                 }
+              }
             }
         }
         
@@ -214,6 +236,7 @@ public class SonarMovement {
             
              //no object found within the maximum distance, go forwards
             if(sonarStereo.left.getFeet() > maxDist && sonarStereo.right.getFeet() > maxDist) {
+                System.out.println("CLEAR");
                 return CLEAR;
                 //System.out.println("Enemy space clear captain, moving ahead");
             }
@@ -221,12 +244,16 @@ public class SonarMovement {
             //object is to the right, turn left
             if(sonarStereo.left.getFeet() > sonarStereo.right.getFeet() &&
                     sonarStereo.right.getFeet() < maxDist) {
+                System.out.println("LEFT");
+                decide = true;
                 return LEFT;
                 //System.out.println("Turning left captain");
             }
             //object is to the left, turn right
             else if(sonarStereo.left.getFeet() < sonarStereo.right.getFeet() &&
-                        sonarStereo.left.getFeet() < maxDist) {             
+                        sonarStereo.left.getFeet() < maxDist) {  
+                System.out.println("RIGHT");
+                decide = true;
                 return RIGHT;
                 //System.out.println("Turning right captain");
             }
@@ -250,9 +277,6 @@ public class SonarMovement {
                     turnLeft(); //Added counter2 = 0 in method turnLeft
                     turnRight(); //Added counter2 = 0 in method turnRight
                     clear();
-                }
-                else {
-                    moveForward();
                 }
                 break;
             }
