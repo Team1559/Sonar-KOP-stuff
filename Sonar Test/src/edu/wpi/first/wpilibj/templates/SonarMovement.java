@@ -12,7 +12,7 @@ public class SonarMovement {
     Gyro gyro;
     int turnStage;
     int timer;
-    final int TIME_LIMIT = 100;
+    final int TIME_LIMIT = 75;
     boolean decisionMade = false;
     
     public SonarMovement(Victor left, Victor right, SonarStereo sonarStereo, Gyro gyro) {
@@ -87,7 +87,7 @@ public class SonarMovement {
             case 0:
                 System.out.println("Stage 0: Turn outward"); // Gyro-based
                 turnRight();
-                if(gyro.getAngle() >= 35) // KOP robot is a n3rd. Change to 45 in actual code!
+                if(gyro.getAngle() >= 30)
                     turnStage = 1;
                 break;
             case 1:
@@ -98,13 +98,14 @@ public class SonarMovement {
                     moveForward();
                 } else {
                     turnStage = 2;
+                    gyro.reset();
                     timer = 0;
                 }
                 break;
             case 2:
                 System.out.println("Stage 2: Turn back"); // Gyro-based
                 turnLeft();
-                if(gyro.getAngle() <= -30) // Change to 90
+                if(gyro.getAngle() <= -75)
                     turnStage = 3;
                 break;
             case 3:
@@ -114,17 +115,19 @@ public class SonarMovement {
                     moveForward();
                 } else {
                     turnStage = 4;
+                    gyro.reset();
                     timer = 0;
                 }
                 break;
             case 4:
                 System.out.println("Stage 4: Re-adjust"); // Gyro-based
                 turnRight();
-                if(gyro.getAngle() >= 0) // Change to 45
+                if(gyro.getAngle() >= 30)
                     turnStage = 5;
                 break;
             case 5:
                 System.out.println("Stage 5: Preparing for another obstacle");
+                gyro.reset();
                 timer = 0;
                 decisionMade = false;
                 decide();
@@ -139,15 +142,14 @@ public class SonarMovement {
     }
 
     public void turnLeft() {
-        setLeft(-.30);
-        setRight(.40);
+        setLeft(-.20);
+        setRight(.30);
     }
     
     public void turnRight() {
-        setLeft(.40);
-        setRight(-.20);
+        setLeft(.25);
+        setRight(-.25);
     }
-    
     public void setLeft(double speed) {
         leftMotor.set(speed);
     }
