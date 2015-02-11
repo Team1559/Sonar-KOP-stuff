@@ -33,12 +33,8 @@ public class RobotTemplate extends IterativeRobot {
 
 	public void autonomousPeriodic() {
             ssonar.periodic();
-            move.gyroReading();
-            if(move.decisionMade) {
-                
-            } else {
+            if(!move.decisionMade)
                 decision = move.decide();
-            }
             move.react(decision);
         }
         
