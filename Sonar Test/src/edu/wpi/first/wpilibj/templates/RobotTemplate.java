@@ -75,11 +75,11 @@ public class RobotTemplate extends IterativeRobot {
 	}
 
 	public void disabledInit() {
-		ssonar.stop();
+            ssonar.stop();   
 	}
 
 	public void disabledPeriodic() {
-
+            move.disable();
 	}
 
 }

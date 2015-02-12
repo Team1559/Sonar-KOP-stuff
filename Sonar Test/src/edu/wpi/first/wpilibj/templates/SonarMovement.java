@@ -6,13 +6,14 @@ import edu.wpi.first.wpilibj.Victor;
 public class SonarMovement {
     
     Victor leftMotor, rightMotor;
-    final int MAXDISTANCE = 4;
+    final double MAXDISTANCE = 3.4999;
     final int NO = 0, LEFT = 1, RIGHT = 2;
     SonarStereo sonarStereo;
+    
     Gyro gyro;
     int turnStage;
     int timer;
-    final int TIME_LIMIT = 100;
+    final int TIME_LIMIT = 75;
     boolean decisionMade = false;
     
     public SonarMovement(Victor left, Victor right, SonarStereo sonarStereo, Gyro gyro) {
@@ -27,17 +28,6 @@ public class SonarMovement {
     public double gyroReading() {
         return gyro.getAngle();
     }
-
-//    public void stopSonar() {
-//        if(sonarStereo.left.getFeet() <= 5 && sonarStereo.right.getFeet() <= 5) {
-//            leftMotor.set(0);
-//            rightMotor.set(0);
-//        } else {
-//            moveForward();
-//            System.out.println("l: " + sonarStereo.left.getFeet());
-//            System.out.println("r: " + sonarStereo.right.getFeet());
-//        }
-//    }
 
     public boolean isDetecting() {
         return sonarStereo.right.getFeet() < MAXDISTANCE || sonarStereo.left.getFeet() < MAXDISTANCE;
@@ -55,6 +45,7 @@ public class SonarMovement {
                 return RIGHT;
             }
         } else {
+            System.out.println("No decision");
             return NO;
         }
     }
@@ -77,23 +68,79 @@ public class SonarMovement {
     }
     
     public void leftSequence() {
-        // change this when right is working
-        rightSequence();
+        System.out.println(gyroReading());
+        switch(turnStage) {
+            case 0:
+                System.out.println("Stage 0: Setup");
+                gyro.reset();
+                turnStage = 1;
+                break;
+            case 1:
+                System.out.println("Stage 1: Turn outward"); // Gyro-based
+                turnLeft();
+                if(gyro.getAngle() <= -35)
+                    turnStage = 2;
+                break;
+            case 2:
+                System.out.println("Stage 2: Forward"); // Time-based
+                timer++;
+                if(timer <= TIME_LIMIT) {
+                    moveForward();
+                } else {
+                    turnStage = 3;
+                    timer = 0;
+                }
+                break;
+            case 3:
+                System.out.println("Stage 3: Turn back"); // Gyro-based
+                turnRight();
+                if(gyro.getAngle() >= 25)
+                    turnStage = 4;
+                break;
+            case 4:
+                System.out.println("Stage 4: Forward again"); // Time-based
+                timer++;
+                if(timer <= TIME_LIMIT) {
+                    moveForward();
+                } else {
+                    turnStage = 5;
+                    timer = 0;
+                }
+                break;
+            case 5:
+                System.out.println("Stage 5: Re-adjust"); // Gyro-based
+                turnLeft();
+                if(gyro.getAngle() <= 0)
+                    turnStage = 6;
+                break;
+            case 6:
+                System.out.println("Stage 6: Preparing for another obstacle");
+                timer = 0;
+                decisionMade = false;
+                gyro.reset();
+                turnStage = 0;
+            default:
+                break;
+        }
     }
     
     public void rightSequence() {
         System.out.println(gyroReading());
         switch(turnStage) {
             case 0:
-                System.out.println("Stage 0: Turn outward"); // Gyro-based
-                turnRight();
-                if(gyro.getAngle() >= 35) // KOP robot is a n3rd. Change to 45 in actual code!
-                    turnStage = 1;
+                System.out.println("Stage 0: Setup");
+                gyro.reset();
+                turnStage = 1;
                 break;
             case 1:
-                System.out.println("Stage 1: Forward"); // Time-based
+                System.out.println("Stage 1: Turn outward"); // Gyro-based
+                turnRight();
+                if(gyro.getAngle() >= 35)
+                    turnStage = 1;
+                break;
+            case 2:
+                System.out.println("Stage 2: Forward"); // Time-based
                 timer++;
-//              System.out.println("Timer: " + timer);
                 if(timer <= TIME_LIMIT) {
                     moveForward();
                 } else {
@@ -101,14 +148,14 @@ public class SonarMovement {
                     timer = 0;
                 }
                 break;
-            case 2:
-                System.out.println("Stage 2: Turn back"); // Gyro-based
+            case 3:
+                System.out.println("Stage 3: Turn back"); // Gyro-based
                 turnLeft();
-                if(gyro.getAngle() <= -30) // Change to 90
+                if(gyro.getAngle() <= -25)
                     turnStage = 3;
                 break;
-            case 3:
-                System.out.println("Stage 3: Forward again"); // Time-based
+            case 4:
+                System.out.println("Stage 4: Forward again"); // Time-based
                 timer++;
                 if(timer <= TIME_LIMIT) {
                     moveForward();
@@ -117,17 +164,18 @@ public class SonarMovement {
                     timer = 0;
                 }
                 break;
-            case 4:
-                System.out.println("Stage 4: Re-adjust"); // Gyro-based
+            case 5:
+                System.out.println("Stage 5: Re-adjust"); // Gyro-based
                 turnRight();
-                if(gyro.getAngle() >= 0) // Change to 45
+                if(gyro.getAngle() >= 0)
                     turnStage = 5;
                 break;
-            case 5:
-                System.out.println("Stage 5: Preparing for another obstacle");
+            case 6:
+                System.out.println("Stage 6: Preparing for another obstacle");
                 timer = 0;
                 decisionMade = false;
-                decide();
+                gyro.reset();
+                turnStage = 0;
             default:
                 break;
         }
@@ -155,4 +203,12 @@ public class SonarMovement {
     public void setRight(double speed) {
         rightMotor.set(-speed);
     }
+    
+    public void disable() {
+        gyro.reset();
+        turnStage = 0;
+        timer = 0;
+        decisionMade = false;
+    }
 }
+    
