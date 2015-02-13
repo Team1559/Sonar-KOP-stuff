@@ -6,10 +6,10 @@ import edu.wpi.first.wpilibj.Victor;
 public class SonarMovement {
     
     Victor leftMotor, rightMotor;
-    final double MAXDISTANCE = 3.5;
+    final double MAXDISTANCE = 4;
     final int NO = 0, LEFT = 1, RIGHT = 2;
     SonarStereo sonarStereo;
-    
+
     Gyro gyro;
     int turnStage;
     int timer;
@@ -38,12 +38,7 @@ public class SonarMovement {
             if (sonarStereo.right.getFeet() < sonarStereo.left.getFeet()) {
                 System.out.println("Left!");
                 decisionMade = true;
-                if(nearWall()) {
-                    System.out.println("Woops! Other way.");
-                    return RIGHT;
-                } else {
-                    return LEFT;
-                }
+                return LEFT;
             } else {
                 System.out.println("Right!");
                 decisionMade = true;
@@ -83,7 +78,7 @@ public class SonarMovement {
             case 1:
                 System.out.println("Stage 1: Turn outward"); // Gyro-based
                 turnLeft();
-                if(gyro.getAngle() <= -35)
+                if(gyro.getAngle() <= -30)
                     turnStage = 2;
                 break;
             case 2:
@@ -140,7 +135,7 @@ public class SonarMovement {
             case 1:
                 System.out.println("Stage 1: Turn outward"); // Gyro-based
                 turnRight();
-                if(gyro.getAngle() >= 35)
+                if(gyro.getAngle() >= 30)
                     turnStage = 2;
                 break;
             case 2:
@@ -216,11 +211,11 @@ public class SonarMovement {
         decisionMade = false;
     }
     
-    public boolean nearWall() {
-        if(false) {// REPLACE WITH ACTUAL SONAR OUTPUT
-            return true;
+    public double getDistance() { // Gets lesser distance
+        if(sonarStereo.left.getFeet() > sonarStereo.right.getFeet()) {
+            return sonarStereo.right.getFeet();
         } else {
-            return false;
+            return sonarStereo.left.getFeet();
         }
     }
 }
