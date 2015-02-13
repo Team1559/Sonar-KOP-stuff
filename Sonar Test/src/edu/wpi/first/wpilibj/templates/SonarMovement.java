@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Victor;
 public class SonarMovement {
     
     Victor leftMotor, rightMotor;
-    final double MAXDISTANCE = 3.4999;
+    final double MAXDISTANCE = 3.5;
     final int NO = 0, LEFT = 1, RIGHT = 2;
     SonarStereo sonarStereo;
     
@@ -38,7 +38,12 @@ public class SonarMovement {
             if (sonarStereo.right.getFeet() < sonarStereo.left.getFeet()) {
                 System.out.println("Left!");
                 decisionMade = true;
-                return LEFT;
+                if(nearWall()) {
+                    System.out.println("Woops! Other way.");
+                    return RIGHT;
+                } else {
+                    return LEFT;
+                }
             } else {
                 System.out.println("Right!");
                 decisionMade = true;
@@ -136,7 +141,7 @@ public class SonarMovement {
                 System.out.println("Stage 1: Turn outward"); // Gyro-based
                 turnRight();
                 if(gyro.getAngle() >= 35)
-                    turnStage = 1;
+                    turnStage = 2;
                 break;
             case 2:
                 System.out.println("Stage 2: Forward"); // Time-based
@@ -144,7 +149,7 @@ public class SonarMovement {
                 if(timer <= TIME_LIMIT) {
                     moveForward();
                 } else {
-                    turnStage = 2;
+                    turnStage = 3;
                     timer = 0;
                 }
                 break;
@@ -152,7 +157,7 @@ public class SonarMovement {
                 System.out.println("Stage 3: Turn back"); // Gyro-based
                 turnLeft();
                 if(gyro.getAngle() <= -25)
-                    turnStage = 3;
+                    turnStage = 4;
                 break;
             case 4:
                 System.out.println("Stage 4: Forward again"); // Time-based
@@ -160,7 +165,7 @@ public class SonarMovement {
                 if(timer <= TIME_LIMIT) {
                     moveForward();
                 } else {
-                    turnStage = 4;
+                    turnStage = 5;
                     timer = 0;
                 }
                 break;
@@ -168,7 +173,7 @@ public class SonarMovement {
                 System.out.println("Stage 5: Re-adjust"); // Gyro-based
                 turnRight();
                 if(gyro.getAngle() >= 0)
-                    turnStage = 5;
+                    turnStage = 6;
                 break;
             case 6:
                 System.out.println("Stage 6: Preparing for another obstacle");
@@ -210,5 +215,12 @@ public class SonarMovement {
         timer = 0;
         decisionMade = false;
     }
-}
     
+    public boolean nearWall() {
+        if(false) {// REPLACE WITH ACTUAL SONAR OUTPUT
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
